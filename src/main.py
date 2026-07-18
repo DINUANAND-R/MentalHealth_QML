@@ -7,12 +7,13 @@ from data_loader import load_dataset
 from eda import perform_eda
 from tfidf import build_tfidf
 from split_data import split_dataset
-from train_svm import train_svm
-from evaluation import evaluate
 from pca import apply_pca
 from scaler import scale_features
-from quantum_qsvc import train_qsvc
+from train_svm import train_svm
+from evaluation import evaluate
 from prepare_quantum_data import prepare_quantum_data
+from quantum_qsvc import train_qsvc
+
 
 def main():
 
@@ -41,62 +42,81 @@ def main():
     X_train, X_test, y_train, y_test = split_dataset(X, y)
 
     # -----------------------------------------
-    # Step 5 : Classical SVM
+    # Step 5 : PCA
     # -----------------------------------------
-    print("\nStep 5 : Training Classical SVM")
-    svm_model = train_svm(X_train, y_train)
-
-    # -----------------------------------------
-    # Step 6 : Evaluate Classical SVM
-    # -----------------------------------------
-    print("\nStep 6 : Evaluating Classical SVM")
-    evaluate(svm_model, X_test, y_test)
-
-    # -----------------------------------------
-    # Step 7 : PCA
-    # -----------------------------------------
-    print("\nStep 7 : Applying PCA")
+    print("\nStep 5 : Applying PCA")
 
     X_train_pca, X_test_pca = apply_pca(
         X_train,
         X_test
     )
 
-    print("\nPCA Completed Successfully")
-
-    print("\nTraining Data Shape after PCA :", X_train_pca.shape)
-    print("Testing Data Shape after PCA  :", X_test_pca.shape)
-
-    print("\nAll Classical Pipeline Steps Completed Successfully")
-
-    print("\nStep 8 : Scaling Features")
+    # -----------------------------------------
+    # Step 6 : Feature Scaling
+    # -----------------------------------------
+    print("\nStep 6 : Scaling Features")
 
     X_train_scaled, X_test_scaled = scale_features(
-    X_train_pca,
-    X_test_pca
+        X_train_pca,
+        X_test_pca
     )
 
+    # -----------------------------------------
+    # Step 7 : Classical SVM
+    # -----------------------------------------
+    print("\nStep 7 : Training Classical SVM")
+
+    svm_model = train_svm(
+        X_train_scaled,
+        y_train
+    )
+
+    # -----------------------------------------
+    # Step 8 : Evaluate Classical SVM
+    # -----------------------------------------
+    print("\nStep 8 : Evaluating Classical SVM")
+
+    evaluate(
+        svm_model,
+        X_test_scaled,
+        y_test
+    )
+
+    # -----------------------------------------
+    # Step 9 : Prepare Quantum Dataset
+    # -----------------------------------------
     print("\nStep 9 : Preparing Quantum Dataset")
 
     (
-    X_train_quantum,
-    X_test_quantum,
-    y_train_quantum,
-    y_test_quantum
+        X_train_quantum,
+        X_test_quantum,
+        y_train_quantum,
+        y_test_quantum
     ) = prepare_quantum_data(
-    X_train_scaled,
-    X_test_scaled,
-    y_train,
-    y_test
+        X_train_scaled,
+        X_test_scaled,
+        y_train,
+        y_test
     )
+
+    # -----------------------------------------
+    # Step 10 : Train Quantum QSVC
+    # -----------------------------------------
     print("\nStep 10 : Training Quantum QSVC")
 
-    train_qsvc(
-    X_train_quantum,
-    X_test_quantum,
-    y_train_quantum,
-    y_test_quantum
+    quantum_model, quantum_accuracy = train_qsvc(
+        X_train_quantum,
+        X_test_quantum,
+        y_train_quantum,
+        y_test_quantum
     )
+
+    print("\n" + "=" * 60)
+    print("FINAL RESULTS")
+    print("=" * 60)
+    print(f"Quantum QSVC Accuracy : {quantum_accuracy:.4f}")
+
+    print("\nPipeline Completed Successfully!")
 
 
 if __name__ == "__main__":

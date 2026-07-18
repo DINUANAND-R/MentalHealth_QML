@@ -83,7 +83,8 @@ def train_qsvc(
     print("\nClassification Report")
     print(classification_report(
         y_test,
-        predictions
+        predictions,
+        zero_division=0
     ))
 
     print("\nConfusion Matrix")
@@ -92,16 +93,17 @@ def train_qsvc(
         predictions
     ))
 
+    # Save the trained model
     os.makedirs(MODELS_DIR, exist_ok=True)
 
-    joblib.dump(
-        model,
-        os.path.join(
-            MODELS_DIR,
-            "quantum_qsvc.pkl"
-        )
+    model_path = os.path.join(
+        MODELS_DIR,
+        "quantum_qsvc.pkl"
     )
 
-    print("\nQuantum Model Saved")
+    joblib.dump(model, model_path)
 
-    return model
+    print("\nSaved:")
+    print("✓ quantum_qsvc.pkl")
+
+    return model,accuracy

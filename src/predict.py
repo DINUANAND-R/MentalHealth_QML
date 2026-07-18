@@ -4,17 +4,28 @@ import os
 from config import MODELS_DIR
 
 
-# Load saved objects
+# Load saved models
 tfidf = joblib.load(os.path.join(MODELS_DIR, "tfidf.pkl"))
 pca = joblib.load(os.path.join(MODELS_DIR, "pca.pkl"))
 scaler = joblib.load(os.path.join(MODELS_DIR, "scaler.pkl"))
+label_encoder = joblib.load(os.path.join(MODELS_DIR, "label_encoder.pkl"))
+
+# Choose the model you want
+#model = joblib.load(os.path.join(MODELS_DIR, "quantum_qsvc.pkl"))
 model = joblib.load(os.path.join(MODELS_DIR, "svm.pkl"))
-label_encoder = joblib.load(
-    os.path.join(MODELS_DIR, "label_encoder.pkl")
-)
+# For classical model instead:
+# model = joblib.load(os.path.join(MODELS_DIR, "svm.pkl"))
 
+print("=" * 60)
+print("MENTAL HEALTH PREDICTION")
+print("=" * 60)
 
-def predict(text):
+while True:
+
+    text = input("\nEnter your feelings (type 'exit' to quit): ")
+
+    if text.lower() == "exit":
+        break
 
     # TF-IDF
     X = tfidf.transform([text])
@@ -26,9 +37,10 @@ def predict(text):
     X = scaler.transform(X)
 
     # Prediction
-    prediction = model.predict(X)
+    pred = model.predict(X)
 
-    # Decode label
-    label = label_encoder.inverse_transform(prediction)
+    label = label_encoder.inverse_transform(pred)[0]
 
-    return label[0]
+    print("\nPrediction :", label)
+    print("Current Working Directory:", os.getcwd())
+    print("SVM expects:", model.n_features_in_, "features")
