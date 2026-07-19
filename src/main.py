@@ -7,43 +7,54 @@ from data_loader import load_dataset
 from eda import perform_eda
 from tfidf import build_tfidf
 from split_data import split_dataset
+
 from pca import apply_pca
 from scaler import scale_features
+
+from train_logistic import train_logistic
 from train_svm import train_svm
 from evaluation import evaluate
+
 from prepare_quantum_data import prepare_quantum_data
 from quantum_qsvc import train_qsvc
 
 
 def main():
 
-    # -----------------------------------------
-    # Step 1 : Load Dataset
-    # -----------------------------------------
+    # ==========================================
+    # STEP 1 : LOAD DATASET
+    # ==========================================
     print("\nStep 1 : Loading Dataset")
+
     df = load_dataset()
 
-    # -----------------------------------------
-    # Step 2 : Exploratory Data Analysis
-    # -----------------------------------------
+    # ==========================================
+    # STEP 2 : EDA
+    # ==========================================
     print("\nStep 2 : Running EDA")
+
     perform_eda(df)
 
-    # -----------------------------------------
-    # Step 3 : TF-IDF Feature Extraction
-    # -----------------------------------------
+    # ==========================================
+    # STEP 3 : TF-IDF
+    # ==========================================
     print("\nStep 3 : Building TF-IDF")
+
     X, y = build_tfidf(df)
 
-    # -----------------------------------------
-    # Step 4 : Train-Test Split
-    # -----------------------------------------
+    # ==========================================
+    # STEP 4 : TRAIN TEST SPLIT
+    # ==========================================
     print("\nStep 4 : Splitting Dataset")
-    X_train, X_test, y_train, y_test = split_dataset(X, y)
 
-    # -----------------------------------------
-    # Step 5 : PCA
-    # -----------------------------------------
+    X_train, X_test, y_train, y_test = split_dataset(
+        X,
+        y
+    )
+
+    # ==========================================
+    # STEP 5 : PCA
+    # ==========================================
     print("\nStep 5 : Applying PCA")
 
     X_train_pca, X_test_pca = apply_pca(
@@ -51,9 +62,9 @@ def main():
         X_test
     )
 
-    # -----------------------------------------
-    # Step 6 : Feature Scaling
-    # -----------------------------------------
+    # ==========================================
+    # STEP 6 : FEATURE SCALING
+    # ==========================================
     print("\nStep 6 : Scaling Features")
 
     X_train_scaled, X_test_scaled = scale_features(
@@ -61,31 +72,46 @@ def main():
         X_test_pca
     )
 
-    # -----------------------------------------
-    # Step 7 : Classical SVM
-    # -----------------------------------------
-    print("\nStep 7 : Training Classical SVM")
+    # ==========================================
+    # STEP 7 : LOGISTIC REGRESSION
+    # ==========================================
+    print("\nStep 7 : Training Logistic Regression")
+
+    logistic_model = train_logistic(
+        X_train_scaled,
+        y_train
+    )
+
+    print("\nStep 8 : Evaluating Logistic Regression")
+
+    logistic_accuracy = evaluate(
+        logistic_model,
+        X_test_scaled,
+        y_test
+    )
+
+    # ==========================================
+    # STEP 9 : LINEAR SVM
+    # ==========================================
+    print("\nStep 9 : Training Linear SVM")
 
     svm_model = train_svm(
         X_train_scaled,
         y_train
     )
 
-    # -----------------------------------------
-    # Step 8 : Evaluate Classical SVM
-    # -----------------------------------------
-    print("\nStep 8 : Evaluating Classical SVM")
+    print("\nStep 10 : Evaluating Linear SVM")
 
-    evaluate(
+    svm_accuracy = evaluate(
         svm_model,
         X_test_scaled,
         y_test
     )
 
-    # -----------------------------------------
-    # Step 9 : Prepare Quantum Dataset
-    # -----------------------------------------
-    print("\nStep 9 : Preparing Quantum Dataset")
+    # ==========================================
+    # STEP 11 : PREPARE QUANTUM DATA
+    # ==========================================
+    print("\nStep 11 : Preparing Quantum Dataset")
 
     (
         X_train_quantum,
@@ -99,10 +125,10 @@ def main():
         y_test
     )
 
-    # -----------------------------------------
-    # Step 10 : Train Quantum QSVC
-    # -----------------------------------------
-    print("\nStep 10 : Training Quantum QSVC")
+    # ==========================================
+    # STEP 12 : QUANTUM QSVC
+    # ==========================================
+    print("\nStep 12 : Training Quantum QSVC")
 
     quantum_model, quantum_accuracy = train_qsvc(
         X_train_quantum,
@@ -111,10 +137,17 @@ def main():
         y_test_quantum
     )
 
-    print("\n" + "=" * 60)
-    print("FINAL RESULTS")
+    # ==========================================
+    # FINAL COMPARISON
+    # ==========================================
+    print("\n")
     print("=" * 60)
-    print(f"Quantum QSVC Accuracy : {quantum_accuracy:.4f}")
+    print("FINAL MODEL COMPARISON")
+    print("=" * 60)
+
+    print(f"Logistic Regression Accuracy : {logistic_accuracy:.4f}")
+    print(f"Linear SVM Accuracy          : {svm_accuracy:.4f}")
+    print(f"Quantum QSVC Accuracy        : {quantum_accuracy:.4f}")
 
     print("\nPipeline Completed Successfully!")
 
