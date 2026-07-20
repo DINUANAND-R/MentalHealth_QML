@@ -2,6 +2,7 @@
 # predict_bert.py
 # ==========================================
 
+import joblib
 import torch
 
 from transformers import (
@@ -9,25 +10,25 @@ from transformers import (
     BertForSequenceClassification
 )
 
-from sklearn.preprocessing import LabelEncoder
-import pandas as pd
-
-from config import DATASET_PATH
-
-
 print("=" * 60)
 print("BERT MENTAL HEALTH PREDICTION")
 print("=" * 60)
 
-df = pd.read_csv(DATASET_PATH)
+# -----------------------------
+# Load Label Encoder
+# -----------------------------
+encoder = joblib.load("../models/bert_label_encoder.pkl")
 
-encoder = LabelEncoder()
-encoder.fit(df["status"])
-
+# -----------------------------
+# Load Tokenizer
+# -----------------------------
 tokenizer = BertTokenizer.from_pretrained(
     "../models/bert_model"
 )
 
+# -----------------------------
+# Load Model
+# -----------------------------
 model = BertForSequenceClassification.from_pretrained(
     "../models/bert_model"
 )
@@ -44,29 +45,33 @@ while True:
         break
 
     inputs = tokenizer(
-
         text,
-
         return_tensors="pt",
-
         truncation=True,
-
         padding=True,
-
         max_length=128
-
     )
 
     with torch.no_grad():
 
         outputs = model(**inputs)
 
-        prediction = torch.argmax(
+        probabilities = torch.softmax(
             outputs.logits,
+            dim=1
+        )
+
+        prediction = torch.argmax(
+            probabilities,
             dim=1
         ).item()
 
-    print(
-        "\nPrediction :",
-        encoder.inverse_transform([prediction])[0]
-    )
+    print("\nPrediction :", encoder.inverse_transform([prediction])[0])
+
+    print("\nConfidence Scores")
+
+    for label, score in zip(
+        encoder.classes_,
+        probabilities[0]
+    ):
+        print(f"{label:12s}: {score.item()*100:.2f}%")
