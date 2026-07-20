@@ -18,6 +18,8 @@ from evaluation import evaluate
 from prepare_quantum_data import prepare_quantum_data
 from quantum_qsvc import train_qsvc
 
+from train_bert import train_bert
+
 
 def main():
 
@@ -150,6 +152,10 @@ def main():
     print(f"Quantum QSVC Accuracy        : {quantum_accuracy:.4f}")
 
     print("\nPipeline Completed Successfully!")
+
+    print("\nStep 11 : Training BERT")
+
+    train_bert(df)
 
 
 if __name__ == "__main__":

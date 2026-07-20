@@ -1,4 +1,5 @@
-# eda.py
+import matplotlib
+matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 
@@ -27,11 +28,9 @@ def perform_eda(df):
     print("\nClass Distribution")
     print(df["status"].value_counts())
 
-    plt.figure(figsize=(8,5))
+    plt.figure(figsize=(8, 5))
 
-    df["status"].value_counts().plot(
-        kind="bar"
-    )
+    df["status"].value_counts().plot(kind="bar")
 
     plt.title("Class Distribution")
     plt.xlabel("Mental Health Status")
