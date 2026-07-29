@@ -1,8 +1,5 @@
-# ==========================================
-# train_bert.py
-# ==========================================
-
 import os
+import numpy as np
 
 from transformers import (
     BertTokenizer,
@@ -13,6 +10,7 @@ from transformers import (
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, f1_score
 import joblib
 
 from bert_dataset import MentalHealthDataset
@@ -82,8 +80,17 @@ def train_bert(df):
     )
 
     # -----------------------------------------
+    # Compute Metrics
+    # -----------------------------------------
+    def compute_metrics(eval_pred):
+        logits, labels = eval_pred
+        predictions = np.argmax(logits, axis=-1)
+        acc = accuracy_score(labels, predictions)
+        f1  = f1_score(labels, predictions, average="weighted", zero_division=0)
+        return {"accuracy": acc, "f1": f1}
+
+    # -----------------------------------------
     # Training Arguments
-    # (Compatible with Transformers 5.x)
     # -----------------------------------------
     training_args = TrainingArguments(
 
@@ -92,20 +99,30 @@ def train_bert(df):
         do_train=True,
         do_eval=True,
 
-        num_train_epochs=3,
+        num_train_epochs=5,           # Increased from 3 → 5
 
         learning_rate=2e-5,
 
+        warmup_ratio=0.1,             # 10% warmup steps
+
+        weight_decay=0.01,            # L2 regularization
+
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
+
+        gradient_accumulation_steps=2, # Effective batch size = 32
 
         eval_strategy="epoch",
 
         save_strategy="epoch",
 
-        logging_steps=100,
+        logging_steps=50,
 
         load_best_model_at_end=True,
+
+        metric_for_best_model="accuracy",
+
+        greater_is_better=True,
 
         report_to="none"
     )
@@ -121,7 +138,9 @@ def train_bert(df):
 
         train_dataset=train_dataset,
 
-        eval_dataset=test_dataset
+        eval_dataset=test_dataset,
+
+        compute_metrics=compute_metrics  # Per-epoch accuracy tracking
     )
 
     # -----------------------------------------

@@ -37,7 +37,7 @@ def train_qsvc(
 
     feature_map = ZZFeatureMap(
         feature_dimension=X_train.shape[1],
-        reps=2
+        reps=3  # Increased from 2→3 for richer quantum feature space
     )
 
     print("Creating Statevector Sampler...")
@@ -60,7 +60,8 @@ def train_qsvc(
     print("Building QSVC Model...")
 
     model = QSVC(
-        quantum_kernel=quantum_kernel
+        quantum_kernel=quantum_kernel,
+        C=10  # Increased regularization for better margin
     )
 
     print("\nTraining Quantum Model...")

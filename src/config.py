@@ -24,6 +24,33 @@ RANDOM_STATE = 42
 
 PCA_COMPONENTS = 8
 
-QUANTUM_TRAIN_SIZE = 50
+# ==========================================
+# QSVC (TF-IDF Pipeline)
+# ==========================================
+QUANTUM_TRAIN_SIZE = 200
 
-QUANTUM_TEST_SIZE = 20
+QUANTUM_TEST_SIZE = 80
+
+# ==========================================
+# VQC (BERT Embedding Pipeline)
+# ==========================================
+
+# Number of samples for BERT → VQC training
+BERT_VQC_TRAIN_SIZE = 200
+
+# Number of samples for BERT → VQC testing
+BERT_VQC_TEST_SIZE = 80
+
+# PCA components for BERT embeddings (must match BERT → VQC qubit count)
+BERT_PCA_COMPONENTS = 8
+
+# VQC circuit repetitions (ansatz depth)
+VQC_REPS = 3
+
+# Maximum iterations for classical optimizer
+VQC_MAX_ITER = 150
+
+# Scaling range for quantum angle encoding [0, pi]
+import math
+BERT_SCALE_MIN = 0.0
+BERT_SCALE_MAX = math.pi
