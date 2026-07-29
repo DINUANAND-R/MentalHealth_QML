@@ -44,11 +44,14 @@ BERT_VQC_TEST_SIZE = 80
 # PCA components for BERT embeddings (must match BERT → VQC qubit count)
 BERT_PCA_COMPONENTS = 8
 
-# VQC circuit repetitions (ansatz depth)
-VQC_REPS = 3
+# VQC circuit repetitions for RealAmplitudes/EfficientSU2 ansatz
+VQC_REPS = 2
 
-# Maximum iterations for classical optimizer
-VQC_MAX_ITER = 150
+# Maximum iterations for classical optimizer (SPSA)
+VQC_MAX_ITER = 300
+
+# Feature map repetitions (ZZFeatureMap)
+VQC_FEATURE_MAP_REPS = 2
 
 # Scaling range for quantum angle encoding [0, pi]
 import math
